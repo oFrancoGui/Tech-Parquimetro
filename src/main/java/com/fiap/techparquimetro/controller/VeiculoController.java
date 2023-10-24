@@ -2,6 +2,7 @@ package com.fiap.techparquimetro.controller;
 
 import com.fiap.techparquimetro.model.Recibo;
 import com.fiap.techparquimetro.model.Veiculo;
+import com.fiap.techparquimetro.service.VeiculoService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,14 +11,17 @@ import java.util.List;
 @RequestMapping("/recibo")
 public class VeiculoController {
 
+    public VeiculoService veiculoService;
+
     @GetMapping
-   public List<Veiculo> obterTodos(){
+    public List<Veiculo> obterTodos(){
        return null;
    }
 
-   @PostMapping
+    @PostMapping
     public Veiculo criar(@RequestBody Veiculo veiculo){
-        return null;
+
+        return this.veiculoService.criar(veiculo);
    }
 
 

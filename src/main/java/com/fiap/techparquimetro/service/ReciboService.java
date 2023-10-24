@@ -9,5 +9,7 @@ public interface ReciboService {
 
     public Recibo criar(Recibo recibo);
 
+    public Recibo obterPorCodigo(String codigo);
+
     //Metodos e assinaturas para serem implementados
 }

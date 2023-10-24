@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/recibo")
 public class ReciboController {
 
-    @PostMapping
-    public Recibo criar(@RequestBody Recibo recibo){
-        return null;
-    }
+  //  @PostMapping()
+ //   public Recibo criar(@RequestBody Recibo recibo){
+  //      return null;
+  //  }
 }
