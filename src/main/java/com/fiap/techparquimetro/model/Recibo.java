@@ -12,8 +12,8 @@ import java.time.LocalTime;
 public class Recibo {
     @Id
     private String codigo;
-    private Veiculo veiculo;
-    private LocalTime horaEntrada;
-    private LocalTime horaSaida;
+    private String IdVeiculo;
+    private String horaEntrada;
+    private String horaSaida;
     private BigDecimal valorRecibo;
 }

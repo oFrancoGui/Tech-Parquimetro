@@ -20,7 +20,19 @@ public class VeiculoServiceImpl implements VeiculoService {
     }
 
     @Override
-    public Veiculo criar(Veiculo recibo) {
-        return this.veiculoRepository.save(recibo);
+    public Veiculo criar(Veiculo veiculo) {
+        return this.veiculoRepository.save(veiculo);
+    }
+
+    @Override
+    public List<Veiculo> findAll() {
+        return null;
+    }
+
+    @Override
+    public Veiculo obterVeiculoPorCodigo(String codigo) {
+        return this.veiculoRepository
+                .findById(codigo)
+                .orElseThrow(()-> new RuntimeException("Veiculo nao deu entrada"));
     }
 }

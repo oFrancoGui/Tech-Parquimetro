@@ -3,19 +3,22 @@ package com.fiap.techparquimetro.controller;
 import com.fiap.techparquimetro.model.Recibo;
 import com.fiap.techparquimetro.model.Veiculo;
 import com.fiap.techparquimetro.service.VeiculoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/recibo")
+@RequestMapping("/veiculo")
 public class VeiculoController {
 
+    @Autowired
     public VeiculoService veiculoService;
 
-    @GetMapping
-    public List<Veiculo> obterTodos(){
-       return null;
+    @GetMapping("/{codigo}")
+    public Veiculo obterVeiculoPorCodigo(@PathVariable String codigo){
+
+        return this.veiculoService.obterVeiculoPorCodigo(codigo);
    }
 
     @PostMapping
