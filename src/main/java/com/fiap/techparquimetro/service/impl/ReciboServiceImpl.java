@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import javax.management.PersistentMBean;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class ReciboServiceImpl implements ReciboService {
         Recibo recibo = new Recibo();
         Date dataHoraAtual = new Date();
         String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+        String hora = new SimpleDateFormat("HH:mm").format(dataHoraAtual);
         recibo.setIdVeiculo(idVeiculoRegistrado);
         recibo.setHoraEntrada(hora);
         return this.reciboRepository.save(recibo);
@@ -53,26 +55,62 @@ public class ReciboServiceImpl implements ReciboService {
 
             if (existeRecibo == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Artigo não encontrado na coleção!");
+                        .body("Recibo não encontrado!");
             }
 
-            //defini um valor qualquer para testar o update
+            Date dataHoraAtualSaida = new Date();
+            existeRecibo.setHoraSaida(new SimpleDateFormat("HH:mm").format(dataHoraAtualSaida));
 
 
-            Date dataHoraAtual = new Date();
-            String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-            String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
-            existeRecibo.setHoraSaida(hora);
+            String entradaHoras = existeRecibo.getHoraEntrada();
+            String saidaHoras = new SimpleDateFormat("HH:mm").format(dataHoraAtualSaida);
 
-            //calcular hora precisa fazer um trambite aqui,defini um valor qualquer para testar o update
-            BigDecimal valorRecibo = new BigDecimal(56.00) ;
-            existeRecibo.setValorRecibo(valorRecibo);
+            int horaEntrada = Integer.parseInt(entradaHoras.substring(0, 2));
+            int minutoEntrada = Integer.parseInt(entradaHoras.substring(entradaHoras.length() -2));
+
+            int horaSaida = Integer.parseInt(saidaHoras.substring(0, 2));
+            //int minutoSaida = Integer.parseInt(saidaHoras.substring(saidaHoras.length() -2));
+            int minutoSaida = 10;
+
+            // calulca custo do minuto, o if serve para caso o minutoEntrada seja menos que o minuto saida
+
+
+
+                if (minutoEntrada > minutoSaida) {
+
+
+                    double custoMinuto = ((60 - minutoEntrada)  + minutoSaida) ;
+                    double custoMinuto2 = 60 - minutoEntrada  + minutoSaida/60 * 15;
+
+                    double custoHora = horaSaida - horaEntrada -1;
+                    double custoRecibo = (custoHora * 15) + custoMinuto;
+
+
+                    System.out.println("Bloco if");
+                    System.out.println("custo"+custoHora);
+                    System.out.println("custo minuto"+custoMinuto);
+                    System.out.println("custo minuto"+custoMinuto2);
+                    System.out.println("quantidade de minutos "+(60 - minutoEntrada  + minutoSaida));
+                    System.out.println("quantidade de horas " + (horaSaida - horaEntrada -1));
+
+                } else {
+
+                    double custoMinuto = ((minutoSaida - minutoEntrada / 60) * 15);
+                    double custoHora = horaSaida - horaEntrada * 15;
+
+                    System.out.println("Else");
+                    System.out.println("custo"+custoHora);
+                    System.out.println("custo minuto"+custoMinuto);
+                    System.out.println("quantidade de minutos "+(minutoSaida  + minutoEntrada));
+                    System.out.println("quantidade de horas " + (horaSaida - horaEntrada -1));
+
+
+                }
 
             this.reciboRepository.save(existeRecibo);
-            System.out.print(existeRecibo);
+
+
             return ResponseEntity.status(HttpStatus.OK).build();
-
-
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
