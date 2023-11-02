@@ -10,5 +10,19 @@ services:
     volumes:
       - mongodb_data_container:/data/db
 
+  my-app:
+    #image: amazoncorretto:11
+    build:
+        context: .
+        dockerfile: DockerfileRodarAplicacaoJava
+
+    #ports:
+    #  - "8080:8080"
+    #volumes:
+    #  - ./app:/app
+    #environment:
+    #  - SPRING_PROFILES_ACTIVE=prod
+    #command: java -jar app.jar
+
 volumes:
   mongodb_data_container:
