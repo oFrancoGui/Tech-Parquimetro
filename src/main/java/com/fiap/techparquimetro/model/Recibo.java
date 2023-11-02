@@ -15,5 +15,5 @@ public class Recibo {
     private String IdVeiculo;
     private String horaEntrada;
     private String horaSaida;
-    private BigDecimal valorRecibo;
+    private double valorRecibo;
 }

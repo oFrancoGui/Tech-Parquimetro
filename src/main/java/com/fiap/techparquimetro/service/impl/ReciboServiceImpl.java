@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import javax.management.PersistentMBean;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -39,40 +41,59 @@ public class ReciboServiceImpl implements ReciboService {
         Recibo recibo = new Recibo();
         Date dataHoraAtual = new Date();
         String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-        String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
+        String hora = new SimpleDateFormat("HH:mm").format(dataHoraAtual);
         recibo.setIdVeiculo(idVeiculoRegistrado);
         recibo.setHoraEntrada(hora);
         return this.reciboRepository.save(recibo);
     }
 
     @Override
-    public ResponseEntity<?> finalizaRecibo(String idRecibo){
+    public ResponseEntity<?> finalizaRecibo(String idRecibo) {
+        double custoRecibo;
+        double custoHorasReais;
+        double custoMinutoReais;
+        double custoMinutoPorHora;
+        double usoHora;
+        double usoMinuto;
         try {
-
             Recibo existeRecibo = this.reciboRepository.findById(idRecibo).orElse(null);
-
             if (existeRecibo == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Artigo não encontrado na coleção!");
+                        .body("Recibo não encontrado!");
             }
+            Date dataHoraAtualSaida = new Date();
+            existeRecibo.setHoraSaida(new SimpleDateFormat("HH:mm").format(dataHoraAtualSaida));
 
-            //defini um valor qualquer para testar o update
+            String entradaHoras = existeRecibo.getHoraEntrada();
+            String saidaHoras = new SimpleDateFormat("HH:mm").format(dataHoraAtualSaida);
+
+            int horaEntrada = Integer.parseInt(entradaHoras.substring(0, 2));
+            int minutoEntrada = Integer.parseInt(entradaHoras.substring(entradaHoras.length() - 2));
+
+            int horaSaida = Integer.parseInt(saidaHoras.substring(0, 2));
+            int minutoSaida = Integer.parseInt(saidaHoras.substring(saidaHoras.length() - 2));
 
 
-            Date dataHoraAtual = new Date();
-            String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
-            String hora = new SimpleDateFormat("HH:mm:ss").format(dataHoraAtual);
-            existeRecibo.setHoraSaida(hora);
+            if (minutoEntrada > minutoSaida) {
+                usoMinuto = ((60 - minutoEntrada) + minutoSaida);
+                custoMinutoPorHora = usoMinuto / 60;
+                custoMinutoReais = custoMinutoPorHora * 15;
+                usoHora = horaSaida - horaEntrada - 1;
+                custoHorasReais = usoHora * 15;
+                custoRecibo = custoHorasReais + custoMinutoReais;
 
-            //calcular hora precisa fazer um trambite aqui,defini um valor qualquer para testar o update
-            BigDecimal valorRecibo = new BigDecimal(56.00) ;
-            existeRecibo.setValorRecibo(valorRecibo);
+            } else {
+                usoMinuto = minutoEntrada - minutoSaida;
+                custoMinutoPorHora = usoMinuto / 60;
+                custoMinutoReais = custoMinutoPorHora * 15;
+                usoHora = horaSaida - horaEntrada;
+                custoHorasReais = usoHora * 15;
 
+            }
+            custoRecibo = custoHorasReais + custoMinutoReais;
+            existeRecibo.setValorRecibo(custoRecibo);
             this.reciboRepository.save(existeRecibo);
-            System.out.print(existeRecibo);
             return ResponseEntity.status(HttpStatus.OK).build();
-
-
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -85,6 +106,6 @@ public class ReciboServiceImpl implements ReciboService {
     public Recibo obterPorCodigo(String codigo) {
         return this.reciboRepository
                 .findById(codigo)
-                .orElseThrow(()-> new IllegalArgumentException("Artigo nao existente"));
+                .orElseThrow(() -> new IllegalArgumentException("Artigo nao existente"));
     }
 }
