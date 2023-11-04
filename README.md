@@ -48,13 +48,13 @@ montada com a seguinte estrutura:
 
 ![Infra_AWS_my-tech-parking-meter.png](src%2Fmain%2Fresources%2Fdocumentation%2FInfra_AWS_my-tech-parking-meter.png "Digrama da Infra na AWS")
 
-| Serviço AWS | Nome do objeto criado | Identificador na AWS   |
-|-------------|-----------------------|------------------------|
-| API Gateway | my-tech-parking-mater | 37q1cuzrei             |
-| VPC         | cluster-fiap-vpc      | vpc-08037dd0619599761  |
-|             |                       |                        |
-|             |                       |                        |
-|             |                       |                        |
+| Serviço AWS    | Nome do objeto criado                   | Identificador na AWS   |
+|----------------|-----------------------------------------|------------------------|
+| API Gateway    | my-tech-parking-mater                   | 37q1cuzrei             |
+| VPC            | cluster-fiap-vpc                        | vpc-08037dd0619599761  |
+| Private Subnet | cluster-fiap-subnet-private1-us-east-1a |                        |
+| -              | cluster-fiap-subnet-private1-us-east-1b |                        |
+|                |                                         |                        |
 
 ## Amazon API Gateway
 É um serviço gerenciado para permitir a criação, publicação, manutenção, monitoração e proteção das APIs, com os
@@ -65,6 +65,13 @@ rodar a aplicação do My Techpaking na WEB.
 O Amazon Virtual Private Cloud (Amazon VPC) permite provisionar uma seção logicamente isolada da Nuvem AWS onde é
 possível executar recursos da AWS em uma rede virtual definida (vide tabela cita em [Infraestrutura](#infraestrutura)).
 
-
+Para proteger a rede dos clusteres foram criadas as seguintes sub redes:
+* Duas redes públicas: para trabalhar o load balancer, dando visibilidade no acesso externo e craindo uma camada para
+chamar os recursos da rede interna.
+  * cluster-fiap-subnet-public1-us-east-1a
+  * cluster-fiap-subnet-public1-us-east-1b
+* Duas redes privadas: para trabalhar com os clusteres e banco de dados de forma isolda de qualquer acesso externo.
+  * cluster-fiap-subnet-public1-us-east-1a
+  * cluster-fiap-subnet-public1-us-east-1b
 
 
