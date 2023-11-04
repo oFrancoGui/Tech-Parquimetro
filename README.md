@@ -66,6 +66,7 @@ O Amazon Virtual Private Cloud (Amazon VPC) permite provisionar uma seção logi
 possível executar recursos da AWS em uma rede virtual definida (vide tabela cita em [Infraestrutura](#infraestrutura)).
 
 Para proteger a rede dos clusteres foram criadas as seguintes sub redes:
+
 * Duas redes públicas: para trabalhar o load balancer, dando visibilidade no acesso externo e craindo uma camada para
 chamar os recursos da rede interna.
   * cluster-fiap-subnet-public1-us-east-1a
@@ -74,4 +75,4 @@ chamar os recursos da rede interna.
   * cluster-fiap-subnet-public1-us-east-1a
   * cluster-fiap-subnet-public1-us-east-1b
 
-
+![AWS_Mapa_Rede.PNG](src%2Fmain%2Fresources%2Fdocumentation%2FAWS_Mapa_Rede.PNG "Mada da rede na AWS")
