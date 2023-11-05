@@ -52,8 +52,8 @@ montada com a seguinte estrutura:
 | API Gateway          | my-tech-parking-mater           | 37q1cuzrei                                                                      |
 | VPC                  | cluster-fiap-vpc                | vpc-08037dd0619599761                                                           |
 | EC2 - Load balancers | ecs-parking-meter-load-balancer | DNS:<br/>internal-eca-events-load-balance-503500598.us-east-1.elb.amazonaws.com |
-| ECS                  | mytechparkingmeter-cluter-vpc   | arn:aws:ecs:us-east-1:503004629953:cluster/mytechparkingmeter-cluter-vpc        |
-
+| ECS Service          | mytechparkingmeter-cluter-vpc   | arn:aws:ecs:us-east-1:503004629953:cluster/mytechparkingmeter-cluter-vpc        |
+| DocumentDB           | docdb-my-tech-parking-meter     | vpc-08037dd0619599761                                                                                |
 
 ## Amazon API Gateway
 É um serviço gerenciado para permitir a criação, publicação, manutenção, monitoração e proteção das APIs, com os
@@ -74,6 +74,10 @@ Para proteger a rede dos clusteres foram criadas as seguintes sub redes na VPC:
 * Duas redes privadas: para trabalhar com os clusteres e banco de dados de forma isolda de qualquer acesso externo.
   * cluster-fiap-subnet-private1-us-east-1a
   * cluster-fiap-subnet-private1-us-east-1b
+* Um subrede provada para o banco de dados:
+  * database-security-group-fiap (vpc-08037dd0619599761)
+    * us-east-1a (subnet-09e02071cc909a052)
+    * us-east-1b (subnet-09bc05a26e60ef2f4)
 
 ![AWS_Mapa_Rede.PNG](src%2Fmain%2Fresources%2Fdocumentation%2FAWS_Mapa_Rede.PNG "Mada da rede na AWS")
 
@@ -103,10 +107,133 @@ Existem três tipos de balanceadores de carga na AWS:
   * o balanceador de carga da aplicação;
   * e o balanceador de carga da rede.
 
-Para a infra desta aplicação foi escolhido o balanceador de carga da rede, para poder distribuir a carga de requisições
-as clustes através do fluxo de rede entre as sub redes privadas criadas geograficamente separadas.
+Para a infra desta aplicação foi escolhido o `balanceador de carga da rede`, para poder distribuir a carga de
+requisições as clustes através do fluxo de rede entre as sub redes privadas criadas geograficamente separadas.
 
 | Load balancer                   | VPC                   | Zona de disp. | Subnet                                  |
 |---------------------------------|-----------------------|---------------|-----------------------------------------|
 | ecs-parking-meter-load-balancer | vpc-08037dd0619599761 | us-east-1a    | cluster-fiap-subnet-private1-us-east-1a |
 | ->                              | ->                    | us-east-1b    | cluster-fiap-subnet-private1-us-east-1b |
+
+## ECS Service
+
+O Amazon Elastic Container Service (ECS) é um serviço totalmente gerenciado de orquestração de contêineres que ajuda a
+implantar, gerenciar e escalar aplicações em contêineres de maneira mais eficiente. Desta forma, nos horários de pico
+quando ocorre o maior número de checkins e chekouts o ECS poderá escalonar de forma dinámica da quantidade instâncias.
+
+Para esta fase inicial do projeto foi optado uma instância do tipo FARGATE, que apresar de ser mais cara poderá indicar
+o quanto de recurso computacional é necessário e assim no futuro auxiliar na configuração de um EC2, com maior controle
+da infra necessária.
+
+Configuração da ´Definição da tarefa´ (no formato JSON):
+```
+{
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:503004629953:task-definition/api-my-tech-parking-meter:1",
+    "containerDefinitions": [
+        {
+            "name": "container-my-tech-parking-meter",
+            "image": "503004629953.dkr.ecr.us-east-1.amazonaws.com/my-tech-parking-meter:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "container-my-tech-parking-meter-80-tcp",
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/api-my-tech-parking-meter",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            }
+        }
+    ],
+    "family": "api-my-tech-parking-meter",
+    "executionRoleArn": "arn:aws:iam::503004629953:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 1,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "2048",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "WINDOWS_SERVER_2019_CORE"
+    },
+    "registeredAt": "2023-10-24T02:50:01.565Z",
+    "registeredBy": "arn:aws:iam::503004629953:user/Vinicius_FIAP_2023",
+    "tags": []
+}
+```
+
+## DocumentDB
+
+Este projeto optou utilizar o MongoDB como banco de dados devido a caracterisicas que pontencializam o seu uso em
+computação em nuvem, como:
+* É escalável, rápido e confiável, podendo lidar com grandes volumes de dados e cargas de trabalho variáveis.
+* Por ser no SQL, oferece vangatens como:
+  * Escalabilidade: O MongoDB é altamente escalável e pode lidar com grandes volumes de dados e cargas de trabalho
+    variáveis. Ele usa uma arquitetura de escala horizontal que permite adicionar mais servidores para aumentar a
+    capacidade de armazenamento e processamento de dados.
+  * Desempenho: O MongoDB é projetado para oferecer desempenho superior em comparação com os bancos de dados
+    relacionais. Ele usa um modelo de dados flexível que permite consultas rápidas e eficientes, mesmo em grandes
+    conjuntos de dados.
+  * Flexibilidade: O MongoDB é altamente flexível e pode armazenar dados em formato JSON. Isso significa que ele pode
+    lidar com dados estruturados e não estruturados, o que o torna ideal para aplicativos modernos que precisam lidar
+    com dados complexos.
+  * Facilidade de uso: O MongoDB é fácil de usar e oferece uma ampla variedade de ferramentas e drivers para várias
+  linguagens de programação e plataformas. Ele também é compatível com o Amazon DocumentDB, um serviço de banco de
+  dados totalmente gerenciado na nuvem.
+* Suporta consultas flexíveis, índices, agregações e transações.
+* Oferece drivers e ferramentas para diversas linguagens de programação e plataformas.
+
+Para hospedar na AWS, este projeto da arquitetura adotou o Amazon DocumentDB (com compatibilidade com o MongoDB) é um
+serviço de banco de dados rápido, confiável e totalmente gerenciado. O Amazon DocumentDB facilita a configuração, a
+operação e a escalabilidade de bancos de dados compatíveis com o MongoDB na nuvem. 
