@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 public class Veiculo {
     @Id
-    private String codigo;
+    private String idVeiculo;
     private String placa;
     private String modelo;
     private String marca;

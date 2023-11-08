@@ -30,14 +30,14 @@ public class ReciboServiceImpl implements ReciboService {
 
 
     @Override
-    public List<Recibo> onterTodos() {
+    public List<Recibo> obterTodos() {
         return this.reciboRepository.findAll();
     }
 
     @Override
     public Recibo criarRecibo(String idVeiculo) {
         // optei por nao salvar o objeto Veiculo
-        String idVeiculoRegistrado = veiculoService.obterVeiculoPorCodigo(idVeiculo).getCodigo();
+        String idVeiculoRegistrado = veiculoService.obterVeiculoPorCodigo(idVeiculo).getIdVeiculo();
         Recibo recibo = new Recibo();
         Date dataHoraAtual = new Date();
         String data = new SimpleDateFormat("dd/MM/yyyy").format(dataHoraAtual);
@@ -103,7 +103,7 @@ public class ReciboServiceImpl implements ReciboService {
 
 
     @Override
-    public Recibo obterPorCodigo(String codigo) {
+    public Recibo listarReciboPorCodigo(String codigo) {
         return this.reciboRepository
                 .findById(codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Artigo nao existente"));
